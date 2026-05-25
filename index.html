@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soda — Menú y Pedidos</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #2D5A3D;
+    --verde-claro: #4A8C5C;
+    --crema: #F5F0E8;
+    --crema-oscura: #EAE3D2;
+    --texto: #1C1C1C;
+    --texto-suave: #5A5A5A;
+    --acento: #C8832A;
+    --rojo: #B83232;
+    --blanco: #FFFFFF;
+    --sombra: 0 2px 12px rgba(0,0,0,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--crema);
+    color: var(--texto);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--verde);
+    color: var(--blanco);
+    padding: 1.2rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    letter-spacing: 0.02em;
+  }
+
+  header .consecutivo-badge {
+    background: var(--acento);
+    color: var(--blanco);
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    display: grid;
+    grid-template-columns: 1fr 370px;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (max-width: 820px) {
+    .container { grid-template-columns: 1fr; }
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--verde);
+    margin-bottom: 1.2rem;
+    border-bottom: 2px solid var(--crema-oscura);
+    padding-bottom: 0.5rem;
+  }
+
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .item-card {
+    background: var(--blanco);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--sombra);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.15s;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .item-card:hover {
+    border-color: var(--verde-claro);
+    transform: translateY(-2px);
+  }
+
+  .item-name {
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--texto);
+  }
+
+  .item-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--acento);
+    font-weight: 600;
+  }
+
+  .item-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+  }
+
+  .item-controls button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--verde);
+    background: var(--blanco);
+    color: var(--verde);
+    font-size: 1.1rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .item-controls button:hover {
+    background: var(--verde);
+    color: var(--blanco);
+  }
+
+  .item-qty {
+    font-size: 1rem;
+    font-weight: 500;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  /* Panel pedido */
+  .pedido-panel {
+    background: var(--blanco);
+    border-radius: 14px;
+    box-shadow: var(--sombra);
+    padding: 1.4rem 1.3rem;
+    position: sticky;
+    top: 80px;
+  }
+
+  .pedido-lista {
+    min-height: 80px;
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+  }
+
+  .pedido-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--crema-oscura);
+    font-size: 0.93rem;
+  }
+
+  .pedido-item-name { color: var(--texto); max-width: 55%; }
+  .pedido-item-qty { color: var(--texto-suave); font-size: 0.85rem; text-align:center; }
+  .pedido-item-sub { color: var(--acento); font-weight: 500; }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--verde);
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 2px solid var(--crema-oscura);
+  }
+
+  .billete-section {
+    margin-top: 1rem;
+    background: var(--crema);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+  }
+
+  .billete-section label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+  }
+
+  .billete-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .billete-btns button {
+    background: var(--crema-oscura);
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .billete-btns button:hover, .billete-btns button.activo {
+    background: var(--verde);
+    color: var(--blanco);
+    border-color: var(--verde);
+  }
+
+  .billete-custom {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .billete-custom input {
+    flex: 1;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    padding: 0.35rem 0.6rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: var(--blanco);
+  }
+
+  .vuelto-display {
+    margin-top: 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--verde-claro);
+    min-height: 24px;
+  }
+
+  .vuelto-insuf {
+    color: var(--rojo);
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+
+  .btn-guardar {
+    width: 100%;
+    margin-top: 1rem;
+    background: var(--verde);
+    color: var(--blanco);
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, transform 0.1s;
+    font-weight: 600;
+  }
+
+  .btn-guardar:hover { background: var(--verde-claro); transform: scale(1.01); }
+  .btn-guardar:disabled { background: #9ab; cursor: not-allowed; transform: none; }
+
+  .btn-limpiar {
+    width: 100%;
+    margin-top: 0.5rem;
+    background: transparent;
+    color: var(--rojo);
+    border: 1.5px solid var(--rojo);
+    border-radius: 10px;
+    padding: 0.55rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .btn-limpiar:hover { background: var(--rojo); color: var(--blanco); }
+
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--verde);
+    color: var(--blanco);
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    z-index: 200;
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  .nota-section {
+    margin-top: 0.8rem;
+  }
+
+  .nota-section label {
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+  }
+
+  .nota-section textarea {
+    width: 100%;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    resize: vertical;
+    background: var(--crema);
+    min-height: 52px;
+  }
+
+  .empty-msg {
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1.5rem 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍽️ Soda La Casita</h1>
+  <span class="consecutivo-badge" id="badge-consec">Pedido #1</span>
+</header>
+
+<div class="container">
+  <!-- MENÚ -->
+  <section>
+    <h2>Menú</h2>
+    <div class="menu-grid" id="menu-grid"></div>
+  </section>
+
+  <!-- PANEL PEDIDO -->
+  <aside class="pedido-panel">
+    <h2>Pedido actual</h2>
+
+    <div class="pedido-lista" id="pedido-lista">
+      <p class="empty-msg">Agregue ítems del menú</p>
+    </div>
+
+    <div class="total-row">
+      <span>Total</span>
+      <span id="total-display">₡0</span>
+    </div>
+
+    <!-- Billete -->
+    <div class="billete-section">
+      <label>Pago con billete (₡)</label>
+      <div class="billete-btns" id="billete-btns"></div>
+      <div class="billete-custom">
+        <input type="number" id="billete-input" placeholder="Otro monto..." min="0" step="500">
+        <button onclick="aplicarBilleteCustom()" style="background:var(--verde);color:#fff;border:none;border-radius:8px;padding:0.35rem 0.7rem;cursor:pointer;font-size:0.85rem;">OK</button>
+      </div>
+      <div id="vuelto-display" class="vuelto-display"></div>
+    </div>
+
+    <!-- Nota -->
+    <div class="nota-section">
+      <label>Notas adicionales (opcional)</label>
+      <textarea id="notas-input" placeholder="Ej: sin sal, para llevar..."></textarea>
+    </div>
+
+    <button class="btn-guardar" id="btn-guardar" onclick="guardarPedido()">📲 Enviar Pedido por WhatsApp</button>
+    <button class="btn-limpiar" onclick="limpiarPedido()">Limpiar pedido</button>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==========================================
+// MENÚ — Solo modificable desde aquí
+// ==========================================
+const MENU = [
+  { id: 1, nombre: "Vigaron",              precio: 3000 },
+  { id: 2, nombre: "Arroz con pollo",      precio: 3000 },
+  { id: 3, nombre: "Sopa de mondongo",     precio: 3000 },
+  { id: 4, nombre: "Gallo de papa",        precio: 1500 },
+  { id: 5, nombre: "Gallo de salchichón",  precio: 1500 },
+  { id: 6, nombre: "Empanada sencilla",    precio: 1000 },
+  { id: 7, nombre: "Empanada arreglada",   precio: 1500 },
+  { id: 8, nombre: "Piña de tamal",        precio: 2000 },
+  { id: 9, nombre: "Café",                precio:  500 },
+  { id: 10, nombre: "Agua dulce",          precio:  500 },
+  { id: 11, nombre: "Refresco gaseoso",    precio: 1000 },
+];
+
+const BILLETES = [1000, 2000, 5000, 10000, 20000, 50000];
+
+// Estado
+let cantidades = {};
+let billeteSeleccionado = 0;
+let consecutivo = parseInt(localStorage.getItem('soda_consec') || '1');
+
+// ==========================================
+// Render menú
+// ==========================================
+function renderMenu() {
+  const grid = document.getElementById('menu-grid');
+  grid.innerHTML = '';
+  MENU.forEach(item => {
+    const cant = cantidades[item.id] || 0;
+    const div = document.createElement('div');
+    div.className = 'item-card';
+    div.innerHTML = `
+      <div class="item-name">${item.nombre}</div>
+      <div class="item-price">₡${item.precio.toLocaleString('es-CR')}</div>
+      <div class="item-controls">
+        <button onclick="cambiarCant(${item.id}, -1)">−</button>
+        <span class="item-qty" id="qty-${item.id}">${cant}</span>
+        <button onclick="cambiarCant(${item.id}, 1)">+</button>
+      </div>
+    `;
+    div.onclick = (e) => {
+      if (!e.target.closest('button')) cambiarCant(item.id, 1);
+    };
+    grid.appendChild(div);
+  });
+}
+
+function cambiarCant(id, delta) {
+  cantidades[id] = Math.max(0, (cantidades[id] || 0) + delta);
+  document.getElementById('qty-' + id).textContent = cantidades[id];
+  renderPedido();
+}
+
+// ==========================================
+// Render panel pedido
+// ==========================================
+function renderPedido() {
+  const lista = document.getElementById('pedido-lista');
+  const items = MENU.filter(i => cantidades[i.id] > 0);
+
+  if (items.length === 0) {
+    lista.innerHTML = '<p class="empty-msg">Agregue ítems del menú</p>';
+  } else {
+    lista.innerHTML = items.map(i => {
+      const sub = i.precio * cantidades[i.id];
+      return `<div class="pedido-item">
+        <span class="pedido-item-name">${i.nombre}</span>
+        <span class="pedido-item-qty">x${cantidades[i.id]}</span>
+        <span class="pedido-item-sub">₡${sub.toLocaleString('es-CR')}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const total = calcularTotal();
+  document.getElementById('total-display').textContent = '₡' + total.toLocaleString('es-CR');
+
+  calcularVuelto();
+}
+
+function calcularTotal() {
+  return MENU.reduce((sum, i) => sum + (i.precio * (cantidades[i.id] || 0)), 0);
+}
+
+// ==========================================
+// Billetes
+// ==========================================
+function renderBilletes() {
+  const cont = document.getElementById('billete-btns');
+  cont.innerHTML = '';
+  BILLETES.forEach(b => {
+    const btn = document.createElement('button');
+    btn.textContent = '₡' + b.toLocaleString('es-CR');
+    btn.onclick = () => seleccionarBillete(b, btn);
+    cont.appendChild(btn);
+  });
+}
+
+function seleccionarBillete(monto, btn) {
+  billeteSeleccionado = monto;
+  document.getElementById('billete-input').value = '';
+  document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+  calcularVuelto();
+}
+
+function aplicarBilleteCustom() {
+  const val = parseInt(document.getElementById('billete-input').value);
+  if (!isNaN(val) && val > 0) {
+    billeteSeleccionado = val;
+    document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
+    calcularVuelto();
+  }
+}
+
+function calcularVuelto() {
+  const disp = document.getElementById('vuelto-display');
+  if (!billeteSeleccionado || billeteSeleccionado <= 0) { disp.innerHTML = ''; return; }
+  const total = calcularTotal();
+  if (total === 0) { disp.innerHTML = ''; return; }
+  const vuelto = billeteSeleccionado - total;
+  if (vuelto < 0) {
+    disp.innerHTML = `<span class="vuelto-insuf">⚠️ Billete insuficiente (faltan ₡${Math.abs(vuelto).toLocaleString('es-CR')})</span>`;
+  } else {
+    disp.innerHTML = `💵 Vuelto: <strong>₡${vuelto.toLocaleString('es-CR')}</strong>`;
+  }
+}
+
+document.getElementById('billete-input').addEventListener('input', () => {
+  const val = parseInt(document.getElementById('billete-input').value);
+  if (!isNaN(val) && val > 0) {
+    billeteSeleccionado = val;
+    document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
+    calcularVuelto();
+  }
+});
+
+// ==========================================
+// Guardar pedido → enviar por WhatsApp
+// ==========================================
+const WHATSAPP_NUM = '50688916481';
+
+function guardarPedido() {
+  const items = MENU.filter(i => cantidades[i.id] > 0);
+  if (items.length === 0) { mostrarToast('⚠️ Agregue al menos un ítem'); return; }
+
+  const total = calcularTotal();
+  const notas = document.getElementById('notas-input').value.trim();
+  const ahora = new Date();
+  const fecha = ahora.toLocaleDateString('es-CR', { year:'numeric', month:'2-digit', day:'2-digit' });
+  const hora = ahora.toLocaleTimeString('es-CR', { hour:'2-digit', minute:'2-digit' });
+
+  let lineas = [];
+  lineas.push(`🍽️ *SODA LA CASITA — Pedido #${consecutivo}*`);
+  lineas.push(`📅 ${fecha}  🕐 ${hora}`);
+  lineas.push('─────────────────────');
+  items.forEach(i => {
+    const sub = i.precio * cantidades[i.id];
+    lineas.push(`• ${i.nombre} x${cantidades[i.id]} → ₡${sub.toLocaleString('es-CR')}`);
+  });
+  lineas.push('─────────────────────');
+  lineas.push(`💰 *TOTAL: ₡${total.toLocaleString('es-CR')}*`);
+
+  if (billeteSeleccionado > 0) {
+    const vuelto = billeteSeleccionado - total;
+    lineas.push(`💵 Pago con: ₡${billeteSeleccionado.toLocaleString('es-CR')}`);
+    if (vuelto >= 0) {
+      lineas.push(`🔄 Vuelto: ₡${vuelto.toLocaleString('es-CR')}`);
+    } else {
+      lineas.push(`⚠️ Falta: ₡${Math.abs(vuelto).toLocaleString('es-CR')}`);
+    }
+  }
+
+  if (notas) {
+    lineas.push('─────────────────────');
+    lineas.push(`📝 Notas: ${notas}`);
+  }
+
+  lineas.push('─────────────────────');
+  lineas.push('¡Buen provecho! 🙏');
+
+  const mensaje = lineas.join('\n');
+  const url = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, '_blank');
+
+  // Avanzar consecutivo
+  consecutivo++;
+  localStorage.setItem('soda_consec', consecutivo);
+  document.getElementById('badge-consec').textContent = `Pedido #${consecutivo}`;
+
+  mostrarToast(`✅ Pedido #${consecutivo - 1} enviado por WhatsApp`);
+  limpiarPedido(false);
+}
+
+function limpiarPedido(toast = true) {
+  cantidades = {};
+  billeteSeleccionado = 0;
+  document.getElementById('billete-input').value = '';
+  document.getElementById('notas-input').value = '';
+  document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
+  renderMenu();
+  renderPedido();
+  if (toast) mostrarToast('🗑️ Pedido limpiado');
+}
+
+// ==========================================
+// Toast
+// ==========================================
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Init
+renderBilletes();
+renderMenu();
+renderPedido();
+document.getElementById('badge-consec').textContent = `Pedido #${consecutivo}`;
+</script>
+</body>
+</html>
