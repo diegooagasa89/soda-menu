@@ -357,7 +357,7 @@
 <body>
 
 <header>
-  <h1>🍽️ Soda La Casita</h1>
+  <h1>🍽️ Soda El Movi</h1>
   <span class="consecutivo-badge" id="badge-consec">Pedido #1</span>
 </header>
 
@@ -429,7 +429,7 @@ const MENU = [
   { id: 11, nombre: "Refresco gaseoso",    precio: 1000 },
 ];
 
-const BILLETES = [1000, 2000, 5000, 10000, 20000, 50000];
+const BILLETES = [1000, 2000, 5000, 10000, 20000, 'SINPE'];
 
 // Estado
 let cantidades = {};
@@ -506,14 +506,17 @@ function renderBilletes() {
   cont.innerHTML = '';
   BILLETES.forEach(b => {
     const btn = document.createElement('button');
-    btn.textContent = '₡' + b.toLocaleString('es-CR');
+    const esSinpe = b === 'SINPE';
+    btn.textContent = esSinpe ? '📲 SINPE' : '₡' + b.toLocaleString('es-CR');
+    if (esSinpe) btn.style.cssText += 'background:var(--verde);color:#fff;border-color:var(--verde);';
     btn.onclick = () => seleccionarBillete(b, btn);
     cont.appendChild(btn);
   });
 }
 
 function seleccionarBillete(monto, btn) {
-  billeteSeleccionado = monto;
+  const esSinpe = monto === 'SINPE';
+  billeteSeleccionado = esSinpe ? calcularTotal() : monto;
   document.getElementById('billete-input').value = '';
   document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
   btn.classList.add('activo');
@@ -534,6 +537,10 @@ function calcularVuelto() {
   if (!billeteSeleccionado || billeteSeleccionado <= 0) { disp.innerHTML = ''; return; }
   const total = calcularTotal();
   if (total === 0) { disp.innerHTML = ''; return; }
+  if (billeteSeleccionado === total) {
+    disp.innerHTML = `<span style="color:var(--verde-claro);font-weight:600;">📲 Pagado por SINPE ✅</span>`;
+    return;
+  }
   const vuelto = billeteSeleccionado - total;
   if (vuelto < 0) {
     disp.innerHTML = `<span class="vuelto-insuf">⚠️ Billete insuficiente (faltan ₡${Math.abs(vuelto).toLocaleString('es-CR')})</span>`;
@@ -559,6 +566,7 @@ const WHATSAPP_NUM = '50688916481';
 function guardarPedido() {
   const items = MENU.filter(i => cantidades[i.id] > 0);
   const cliente = document.getElementById('cliente-input').value.trim();
+  const esPagoSinpe = billeteSeleccionado > 0 && billeteSeleccionado === calcularTotal();
   if (items.length === 0) { mostrarToast('⚠️ Agregue al menos un ítem'); return; }
   if (!cliente) { mostrarToast('⚠️ Ingrese el nombre del cliente'); document.getElementById('cliente-input').focus(); return; }
 
@@ -570,7 +578,7 @@ function guardarPedido() {
 
   let lineas = [];
   const tituloPedido = cliente ? `Pedido ${cliente}` : `Pedido #${consecutivo}`;
-  lineas.push(`🍽️ *SODA LA CASITA — ${tituloPedido}*`);
+  lineas.push(`🍽️ *SODA EL MOVI — ${tituloPedido}*`);
   if (cliente) lineas.push(`👤 Cliente: *${cliente}*`);
   lineas.push(`📅 ${fecha}  🕐 ${hora}`);
   lineas.push('─────────────────────');
@@ -581,7 +589,9 @@ function guardarPedido() {
   lineas.push('─────────────────────');
   lineas.push(`💰 *TOTAL: ₡${total.toLocaleString('es-CR')}*`);
 
-  if (billeteSeleccionado > 0) {
+  if (esPagoSinpe) {
+    lineas.push(`📲 Pago por SINPE ✅`);
+  } else if (billeteSeleccionado > 0) {
     const vuelto = billeteSeleccionado - total;
     lineas.push(`💵 Pago con: ₡${billeteSeleccionado.toLocaleString('es-CR')}`);
     if (vuelto >= 0) {
