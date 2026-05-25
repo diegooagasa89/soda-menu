@@ -392,6 +392,12 @@
       <div id="vuelto-display" class="vuelto-display"></div>
     </div>
 
+    <!-- Nombre cliente -->
+    <div class="nota-section">
+      <label>Nombre del cliente <span style="color:var(--rojo)">*</span></label>
+      <input type="text" id="cliente-input" placeholder="Ej: María, Mesa 3..." style="width:100%;border:1.5px solid #ccc;border-radius:8px;padding:0.4rem 0.6rem;font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--crema);">
+    </div>
+
     <!-- Nota -->
     <div class="nota-section">
       <label>Notas adicionales (opcional)</label>
@@ -552,7 +558,9 @@ const WHATSAPP_NUM = '50688916481';
 
 function guardarPedido() {
   const items = MENU.filter(i => cantidades[i.id] > 0);
+  const cliente = document.getElementById('cliente-input').value.trim();
   if (items.length === 0) { mostrarToast('⚠️ Agregue al menos un ítem'); return; }
+  if (!cliente) { mostrarToast('⚠️ Ingrese el nombre del cliente'); document.getElementById('cliente-input').focus(); return; }
 
   const total = calcularTotal();
   const notas = document.getElementById('notas-input').value.trim();
@@ -561,7 +569,9 @@ function guardarPedido() {
   const hora = ahora.toLocaleTimeString('es-CR', { hour:'2-digit', minute:'2-digit' });
 
   let lineas = [];
-  lineas.push(`🍽️ *SODA LA CASITA — Pedido #${consecutivo}*`);
+  const tituloPedido = cliente ? `Pedido ${cliente}` : `Pedido #${consecutivo}`;
+  lineas.push(`🍽️ *SODA LA CASITA — ${tituloPedido}*`);
+  if (cliente) lineas.push(`👤 Cliente: *${cliente}*`);
   lineas.push(`📅 ${fecha}  🕐 ${hora}`);
   lineas.push('─────────────────────');
   items.forEach(i => {
@@ -596,9 +606,9 @@ function guardarPedido() {
   // Avanzar consecutivo
   consecutivo++;
   localStorage.setItem('soda_consec', consecutivo);
-  document.getElementById('badge-consec').textContent = `Pedido #${consecutivo}`;
+  document.getElementById('badge-consec').textContent = tituloPedido;
 
-  mostrarToast(`✅ Pedido #${consecutivo - 1} enviado por WhatsApp`);
+  mostrarToast(`✅ ${tituloPedido} enviado por WhatsApp`);
   limpiarPedido(false);
 }
 
@@ -607,6 +617,7 @@ function limpiarPedido(toast = true) {
   billeteSeleccionado = 0;
   document.getElementById('billete-input').value = '';
   document.getElementById('notas-input').value = '';
+  document.getElementById('cliente-input').value = '';
   document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
   renderMenu();
   renderPedido();
@@ -628,6 +639,10 @@ renderBilletes();
 renderMenu();
 renderPedido();
 document.getElementById('badge-consec').textContent = `Pedido #${consecutivo}`;
+document.getElementById('cliente-input').addEventListener('input', () => {
+  const nombre = document.getElementById('cliente-input').value.trim();
+  document.getElementById('badge-consec').textContent = nombre ? `Pedido ${nombre}` : `Pedido #${consecutivo}`;
+});
 </script>
 </body>
 </html>
