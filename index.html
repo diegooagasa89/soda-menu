@@ -434,6 +434,8 @@ const BILLETES = [1000, 2000, 5000, 10000, 20000, 'SINPE'];
 // Estado
 let cantidades = {};
 let billeteSeleccionado = 0;
+  esSinpe = false;
+let esSinpe = false;
 let consecutivo = parseInt(localStorage.getItem('soda_consec') || '1');
 
 // ==========================================
@@ -515,7 +517,7 @@ function renderBilletes() {
 }
 
 function seleccionarBillete(monto, btn) {
-  const esSinpe = monto === 'SINPE';
+  esSinpe = monto === 'SINPE';
   billeteSeleccionado = esSinpe ? calcularTotal() : monto;
   document.getElementById('billete-input').value = '';
   document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
@@ -527,6 +529,7 @@ function aplicarBilleteCustom() {
   const val = parseInt(document.getElementById('billete-input').value);
   if (!isNaN(val) && val > 0) {
     billeteSeleccionado = val;
+    esSinpe = false;
     document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
     calcularVuelto();
   }
@@ -537,7 +540,7 @@ function calcularVuelto() {
   if (!billeteSeleccionado || billeteSeleccionado <= 0) { disp.innerHTML = ''; return; }
   const total = calcularTotal();
   if (total === 0) { disp.innerHTML = ''; return; }
-  if (billeteSeleccionado === total) {
+  if (esSinpe) {
     disp.innerHTML = `<span style="color:var(--verde-claro);font-weight:600;">📲 Pagado por SINPE ✅</span>`;
     return;
   }
@@ -553,6 +556,7 @@ document.getElementById('billete-input').addEventListener('input', () => {
   const val = parseInt(document.getElementById('billete-input').value);
   if (!isNaN(val) && val > 0) {
     billeteSeleccionado = val;
+    esSinpe = false;
     document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
     calcularVuelto();
   }
@@ -566,7 +570,7 @@ const WHATSAPP_NUM = '50688916481';
 function guardarPedido() {
   const items = MENU.filter(i => cantidades[i.id] > 0);
   const cliente = document.getElementById('cliente-input').value.trim();
-  const esPagoSinpe = billeteSeleccionado > 0 && billeteSeleccionado === calcularTotal();
+  const esPagoSinpe = esSinpe;
   if (items.length === 0) { mostrarToast('⚠️ Agregue al menos un ítem'); return; }
   if (!cliente) { mostrarToast('⚠️ Ingrese el nombre del cliente'); document.getElementById('cliente-input').focus(); return; }
 
@@ -625,6 +629,7 @@ function guardarPedido() {
 function limpiarPedido(toast = true) {
   cantidades = {};
   billeteSeleccionado = 0;
+  esSinpe = false;
   document.getElementById('billete-input').value = '';
   document.getElementById('notas-input').value = '';
   document.getElementById('cliente-input').value = '';
