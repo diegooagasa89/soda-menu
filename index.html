@@ -539,7 +539,7 @@ function renderBilletes() {
     const btn = document.createElement('button');
     const esSinpe = b === 'SINPE';
     btn.textContent = esSinpe ? '📲 SINPE' : '₡' + b.toLocaleString('es-CR');
-    if (esSinpe) btn.style.cssText += 'background:var(--verde);color:#fff;border-color:var(--verde);';
+    // if (esSinpe) btn.style.cssText += 'background:var(--verde);color:#fff;border-color:var(--verde);';
     btn.onclick = () => seleccionarBillete(b, btn);
     cont.appendChild(btn);
   });
@@ -662,6 +662,7 @@ function limpiarPedido(toast = true) {
   document.getElementById('billete-input').value = '';
   document.getElementById('notas-input').value = '';
   document.getElementById('cliente-input').value = '';
+  document.getElementById('badge-consec').textContent = `Pedido #${consecutivo}`;
   document.querySelectorAll('.billete-btns button').forEach(b => b.classList.remove('activo'));
   renderMenu();
   renderPedido();
