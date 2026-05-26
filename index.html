@@ -104,6 +104,33 @@
     transform: translateY(-2px);
   }
 
+  .item-card-reposteria {
+    background: #FFF8F0;
+    border-color: #F0C080;
+  }
+
+  .item-card-reposteria:hover {
+    border-color: var(--acento);
+  }
+
+  .item-card-reposteria .item-name {
+    color: #8B4513;
+  }
+
+  .item-card-reposteria .item-price {
+    color: #C8832A;
+  }
+
+  .item-card-reposteria .item-controls button {
+    border-color: var(--acento);
+    color: var(--acento);
+  }
+
+  .item-card-reposteria .item-controls button:hover {
+    background: var(--acento);
+    color: var(--blanco);
+  }
+
   .item-name {
     font-weight: 500;
     font-size: 1rem;
@@ -419,14 +446,17 @@ const MENU = [
   { id: 1, nombre: "Vigaron",              precio: 3000 },
   { id: 2, nombre: "Arroz con pollo",      precio: 3000 },
   { id: 3, nombre: "Sopa de mondongo",     precio: 3000 },
-  { id: 4, nombre: "Gallo de papa",        precio: 1500 },
-  { id: 5, nombre: "Gallo de salchichón",  precio: 1500 },
+  { id: 4, nombre: "Gallo de papa",        precio: 1000 },
+  { id: 5, nombre: "Gallo de salchichón",  precio: 1000 },
   { id: 6, nombre: "Empanada sencilla",    precio: 1000 },
   { id: 7, nombre: "Empanada arreglada",   precio: 1500 },
   { id: 8, nombre: "Piña de tamal",        precio: 2000 },
   { id: 9, nombre: "Café",                precio:  500 },
   { id: 10, nombre: "Agua dulce",          precio:  500 },
   { id: 11, nombre: "Refresco gaseoso",    precio: 1000 },
+  { id: 12, nombre: "Copo",            precio: 1000, categoria: "reposteria" },
+  { id: 13, nombre: "Repostería 1000",            precio: 1000, categoria: "reposteria" },
+  { id: 14, nombre: "Repostería 500",            precio:  500, categoria: "reposteria" },
 ];
 
 const BILLETES = [1000, 2000, 5000, 10000, 20000, 'SINPE'];
@@ -446,7 +476,7 @@ function renderMenu() {
   MENU.forEach(item => {
     const cant = cantidades[item.id] || 0;
     const div = document.createElement('div');
-    div.className = 'item-card';
+    div.className = 'item-card' + (item.categoria === 'reposteria' ? ' item-card-reposteria' : '');
     div.innerHTML = `
       <div class="item-name">${item.nombre}</div>
       <div class="item-price">₡${item.precio.toLocaleString('es-CR')}</div>
